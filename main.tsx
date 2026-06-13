@@ -1,4 +1,9 @@
+
+import './index.css'; // <-- ADD THIS LINE AT THE VERY TOP
 import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { useState, useRef, useEffect } from 'react';
+// ... rest of your importsimport React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';

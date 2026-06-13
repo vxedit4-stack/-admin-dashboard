@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CashflowItem, } from '../types';
-import { EXPENSE_CATEGORIES } from '../data';
+import { CashflowItem } from './types';
+import { EXPENSE_CATEGORIES } from './data';
 import { Info, HelpCircle } from 'lucide-react';
 
 interface ChartsProps {
@@ -9,14 +9,13 @@ interface ChartsProps {
 }
 
 export default function Charts({ cashflowData }: ChartsProps) {
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(5); // Default to June (index 5) as showcased in image 1!
+  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(5);
   const [hoveredDoughnutIndex, setHoveredDoughnutIndex] = useState<number | null>(null);
   const [timeframe, setTimeframe] = useState('This Year');
   const [donutType, setDonutType] = useState('This Month');
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(500);
 
-  // Measure the width of the bar chart container to be 100% responsive
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -28,7 +27,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
     return () => observer.disconnect();
   }, []);
 
-  // Bar chart mathematics
   const height = 240;
   const paddingLeft = 32;
   const paddingRight = 16;
@@ -38,7 +36,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
   
-  // Find max value to scale heights
   const maxVal = Math.max(...cashflowData.flatMap(d => [d.income, d.expense]), 8000);
   
   const getX = (index: number) => {
@@ -51,12 +48,10 @@ export default function Charts({ cashflowData }: ChartsProps) {
     return paddingTop + chartHeight * (1 - ratio);
   };
 
-  // Doughnut math constants
   const donutRadius = 60;
   const donutStrokeWidth = 16;
   const donutCenter = 80;
   
-  // Calculate SVG circular arc segments
   let totalExpense = EXPENSE_CATEGORIES.reduce((sum, c) => sum + c.amount, 0);
   let accumulatedPercent = 0;
   
@@ -74,19 +69,15 @@ export default function Charts({ cashflowData }: ChartsProps) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 1. CASHFLOW GROUPED BAR CHART (Left column: spanning 2 cols on lg) */}
       <div className="lg:col-span-2 rounded-3xl bg-white/20 border border-white/40 p-5 backdrop-blur-xl shadow-lg flex flex-col justify-between" ref={containerRef}>
         <div>
-          {/* Chart Header */}
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="font-display font-extrabold text-base text-purple-950">Cashflow</h3>
               <p className="text-[10px] text-purple-950/40 uppercase tracking-wider font-bold">Income vs Expenses tracking</p>
             </div>
             
-            {/* View options dropdown */}
             <div className="flex gap-2.5 items-center">
-              {/* Legend Indicator */}
               <div className="flex gap-3 text-xs font-bold text-purple-950/60 mr-2">
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-sm bg-purple-800" />
@@ -111,16 +102,13 @@ export default function Charts({ cashflowData }: ChartsProps) {
             </div>
           </div>
 
-          {/* June visual tag highlighted exactly from image 1 */}
           <div className="mb-2 flex items-baseline gap-2">
             <span className="text-2xl font-mono font-black text-purple-950 tracking-tight">$562,000</span>
             <span className="text-[10px] font-semibold text-purple-950/40">Total Balance accrued</span>
           </div>
         </div>
 
-        {/* SVG Interactive Chart Drawing Area */}
         <div className="relative mt-2">
-          {/* Custom June 2029 Tooltip (matches first image exactly!) */}
           <AnimatePresence>
             {hoveredBarIndex !== null && (
               <motion.div
@@ -156,7 +144,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
           </AnimatePresence>
 
           <svg width={width} height={height} className="overflow-visible">
-            {/* Grid Lines */}
             {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
               const yVal = paddingTop + chartHeight * ratio;
               const gridLabel = Math.round(maxVal * (1 - ratio) / 1000);
@@ -182,17 +169,14 @@ export default function Charts({ cashflowData }: ChartsProps) {
               );
             })}
 
-            {/* Bars Column Drawing */}
             {cashflowData.map((item, index) => {
               const xCenter = getX(index);
               const barSpacing = chartWidth / cashflowData.length;
-              const barWidth = Math.min(Math.max(barSpacing * 0.25, 6), 14); // Responsive width
+              const barWidth = Math.min(Math.max(barSpacing * 0.25, 6), 14);
               
-              // Income parameters
               const yIncome = getY(item.income);
               const barHeightIncome = chartHeight + paddingTop - yIncome;
               
-              // Expense parameters
               const yExpense = getY(item.expense);
               const barHeightExpense = chartHeight + paddingTop - yExpense;
 
@@ -202,7 +186,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
                   onMouseEnter={() => setHoveredBarIndex(index)}
                   className="cursor-pointer"
                 >
-                  {/* Invisible wide trigger block for comfortable hovering */}
                   <rect
                     x={xCenter - barSpacing / 2}
                     y={paddingTop}
@@ -211,7 +194,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
                     fill="transparent"
                   />
 
-                  {/* Highlight bar column hover background overlay */}
                   {hoveredBarIndex === index && (
                     <rect
                       x={xCenter - barSpacing / 2}
@@ -223,7 +205,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
                     />
                   )}
 
-                  {/* Income Bar (Deep purple-violet) */}
                   <rect
                     x={xCenter - barWidth - 1}
                     y={yIncome}
@@ -234,7 +215,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
                     className="transition-all duration-300"
                   />
 
-                  {/* Expense Bar (Soft pastel pink/coral) */}
                   <rect
                     x={xCenter + 1}
                     y={yExpense}
@@ -245,7 +225,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
                     className="transition-all duration-300"
                   />
 
-                  {/* Bottom Text Label */}
                   <text
                     x={xCenter}
                     y={height - 8}
@@ -260,7 +239,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
               );
             })}
 
-            {/* Gradient Definitions */}
             <defs>
               <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#6d28d9" stopOpacity="0.85" />
@@ -275,7 +253,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
         </div>
       </div>
 
-      {/* 2. DOUGHNUT CHART CATEGORIES (Right column) */}
       <div className="rounded-3xl bg-white/20 border border-white/40 p-5 backdrop-blur-xl shadow-lg flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-center mb-3">
@@ -296,7 +273,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
           </div>
 
           <div className="flex justify-center my-4 relative">
-            {/* Center Content for Total Spending: In image 1, centered $3,500 total expense */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-[10px] font-extrabold tracking-wider uppercase text-purple-950/40">Total Expense</span>
               <span className="font-mono text-xl lg:text-2xl font-black text-purple-900 leading-none">
@@ -307,7 +283,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
               </span>
             </div>
 
-            {/* Donut SVG */}
             <svg 
               width={donutCenter * 2} 
               height={donutCenter * 2} 
@@ -346,7 +321,6 @@ export default function Charts({ cashflowData }: ChartsProps) {
           </div>
         </div>
 
-        {/* Categories Breakdown List */}
         <div className="space-y-1.5 mt-2 max-h-[170px] overflow-y-auto pr-1">
           {EXPENSE_CATEGORIES.map((category, idx) => {
             const isHovered = hoveredDoughnutIndex === idx;

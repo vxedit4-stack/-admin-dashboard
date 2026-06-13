@@ -1,5 +1,4 @@
-# Workflow for deploying a Vite/React app to GitHub Pages
-name: Deploy Vite React to Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -11,37 +10,29 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '18'
       
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       
-      - name: Build project
+      - name: Build
         run: npm run build
       
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
-          # Vite builds to the 'dist' folder by default
-          path: ./dist 
+          path: ./dist
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
@@ -51,4 +42,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v3
